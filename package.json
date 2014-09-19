@@ -1,0 +1,16 @@
+{
+	"name": "Markup",
+	"description": "Stub for HTML project",
+	"version": "1.0.0",
+	"homepage": "http://wemakesites.ru",
+	"author": {
+		"name": "Alexandr Kirikovich",
+		"email": "mail@akirikovich.ru",
+		"url": "http://wemakesites.ru"
+	},
+	"devDependencies": {
+		"grunt": "*",
+		"grunt-contrib-watch": "*",
+		"grunt-contrib-jade": "*"
+	}
+}

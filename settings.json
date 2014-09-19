@@ -1,0 +1,45 @@
+{
+	"info": {
+		"name": "Chebenha.ru",
+		"code": "chebenka",
+		"year": "2014",
+		"notes": "",
+		"productionUrl": "http://wemakesites.ru/chebenka/"
+	},
+	"paths": {
+		"dev": {
+			"root": "./dev",
+			"views": "./dev/views",
+			"dummy": "./dev/dummy",
+			"templates": "./dev/templates",
+			"lib": "./dev/lib",
+			"js": "./dev/public/js",
+			"images": "./dev/public/i",
+			"css": "./dev/public/css",
+			"fonts": "./dev/public/fonts",
+			"docs": "./dev/docs/"
+		},
+		"prod": {
+			"root": "./prod",
+			"dummy": "./prod/dummy",
+			"fonts": "./prod/fonts",
+			"images": "./prod/i",
+			"css": "./prod/css",
+			"js": "./prod/js",
+			"pages": "./prod/pages",
+			"archives": "./prod/archives"
+		}
+	},
+	"pages": {
+		"home": {
+			"name": "Home page",
+			"progress": "15",
+			"template": "base"
+		},
+		"inner": {
+			"name": "Inner page",
+			"progress": "27",
+			"template": "inner"
+		}
+	}
+}
