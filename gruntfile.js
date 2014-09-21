@@ -288,10 +288,10 @@ module.exports = function(grunt) {
 	// Создание каскада проекта
 	// Пример вызова: grunt start:<name — название проекта на Русском языке>:<code — кодовое имя проекта на латинице>:<year — год разработки проекта>
 	grunt.registerTask("start", "Create project structure", function(name, code, year) {
-		// Если не передано ни одного аргумента
-		if(arguments.length === 0) {
-			return false;
-		}
+
+		var cssFileName = settings.paths.dev.css + "/" + settings.info.code + ".styl",
+			jsFileName = settings.paths.dev.js + "/" + settings.info.code + ".js";
+
 		// Создание раздела info
 		if(!settings.info) {
 			// Если по какой-то причине раздел отстуствовал, то создаём его
@@ -311,7 +311,32 @@ module.exports = function(grunt) {
 			settings.info.year = year;
 		}
 
-		grunt.file.write('settings.json', JSON.stringify(settings, null, "	"));
+		// Запись значений в файл settings.json
+		grunt.file.write("settings.json", JSON.stringify(settings, null, "	"));
+
+		// Создание структуры каталогов проекта
+		
+		// CSS
+		if(!grunt.file.read(cssFileName)) {
+			grunt.file.mkdir(settings.paths.dev.css);
+			grunt.file.write(cssFileName);
+		}
+
+		// JS
+		if(!grunt.file.read(jsFileName)) {
+			grunt.file.mkdir(settings.paths.dev.js);
+			grunt.file.write(jsFileName);
+		}
+
+		// Images
+		grunt.file.mkdir(settings.paths.dev.images);
+
+		// Dummy
+		grunt.file.mkdir(settings.paths.dev.dummy);
+
+		// Удаление файла .gitignore из директории для разработки
+		grunt.file.delete(settings.paths.dev.root + "/.gitignore");
+
 	});
 
 	// Добавление или обновление страницы
@@ -350,7 +375,7 @@ module.exports = function(grunt) {
 		}
 
 		// Обновляем файл параметров
-		grunt.file.write('settings.json', JSON.stringify(settings, null, "	"));
+		grunt.file.write("settings.json", JSON.stringify(settings, null, "	"));
 
 		// Запускаем задание на обновление главной страницы
 		grunt.task.run("jade:front");
