@@ -2,7 +2,7 @@
 
 Необходима последняя версия node.js: http://nodejs.org/
 
-1) Клонироввание: git clone https://mexe@bitbucket.org/mexe/stub.git
+1. Клонироввание: git clone https://mexe@bitbucket.org/mexe/stub.git
 
 2) npm install
 
@@ -16,6 +16,8 @@
 6) Команды:
 
 
+```
+#!javascript
 grunt start:<name — название проекта на Русском языке>:<code — кодовое имя проекта на латинице>:<year — год разработки проекта>
 grunt page:<name — название страницы>:<code — кодовое имя страницы>:<progress — текущий прогресс>:<template — название шаблона>
 grunt generate — генерация шаблонов и макетов
@@ -23,3 +25,5 @@ grunt sync — синхронизация всех статических фай
 grunt production — создание версии для проакшена
 grunt compress — создание архива с проектом
 grunt deploy — загрузка на сервер
+
+```
