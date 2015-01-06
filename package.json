@@ -11,6 +11,13 @@
 	"devDependencies": {
 		"grunt": "*",
 		"grunt-contrib-watch": "*",
-		"grunt-contrib-jade": "*"
+		"grunt-contrib-jade": "*",
+		"grunt-contrib-stylus": "*",
+		"grunt-spritesmith": "*",
+		"spritesheet-templates": "*",
+		"grunt-sync": "*",
+		"grunt-newer": "*",
+		"grunt-contrib-compress": "*",
+		"grunt-ftp-push": "*"
 	}
 }

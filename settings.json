@@ -1,10 +1,10 @@
 {
 	"info": {
-		"name": "Chebenka.ru",
-		"code": "chebenka",
-		"year": "2014",
+		"name": "Test",
+		"code": "test",
+		"year": "2015",
 		"notes": "",
-		"productionUrl": "http://wemakesites.ru/chebenka/"
+		"productionUrl": "http://wemakesites.ru/test/"
 	},
 	"paths": {
 		"dev": {
@@ -27,19 +27,19 @@
 			"css": "./prod/css",
 			"js": "./prod/js",
 			"pages": "./prod/pages",
-			"archives": "./prod/archives"
+			"archives": "./archives"
 		}
 	},
 	"pages": {
 		"home": {
-			"name": "Home page",
-			"progress": "15",
+			"name": "Home",
+			"progress": "0",
 			"template": "base"
 		},
-		"inner": {
-			"name": "Inner page",
-			"progress": "27",
-			"template": "inner"
+		"test": {
+			"name": "test",
+			"progress": "0",
+			"template": "base"
 		}
 	}
 }
