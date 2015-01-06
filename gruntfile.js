@@ -11,9 +11,11 @@ module.exports = function(grunt) {
 	frontPage[settings.paths.prod.root + "/index.html"] = settings.paths.dev.root + "/index.jade";
 	// Styl файлы для компиляции
 	var stylusFiles = {};
-	grunt.file.recurse(settings.paths.dev.css, function(abspath, rootdir, subdir, filename) {
-		stylusFiles[(settings.paths.prod.css + "/" + filename.replace(".styl", ".css"))] = abspath;
-	});
+	if(grunt.file.isDir(settings.paths.dev.css)) {
+		grunt.file.recurse(settings.paths.dev.css, function(abspath, rootdir, subdir, filename) {
+			stylusFiles[(settings.paths.prod.css + "/" + filename.replace(".styl", ".css"))] = abspath;
+		});
+	}
 	// Конфигурация заданий
 	grunt.initConfig({
 		// Компиляция стилевых файлов
