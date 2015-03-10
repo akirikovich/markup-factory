@@ -1,50 +1,56 @@
 module.exports = function(grunt) {
-
-	var settings = grunt.file.readJSON("settings.json"),
-		jadeFiles = {};
-
-	//jade files list forming
-	for(var i = 0; i < settings.pages.length; i++) {
-		var curPage = settings.pages[i].code;
-
-		jadeFiles[settings.paths.prod.pages + "/" + curPage + ".html"] = settings.paths.dev.views + "/" + curPage + ".jade";
+	// Настройки
+	var settings = grunt.file.readJSON("settings.json");
+	// Список html шаблонов на компиляцию
+	var jadeViews = {};
+	for(var pageCode in settings.pages) {
+		jadeViews[settings.paths.prod.pages + "/" + pageCode + ".html"] = settings.paths.dev.views + "/" + pageCode + ".jade";
 	}
-	jadeFiles[settings.paths.prod.root + "/index.html"] = settings.paths.dev.root + "/index.jade";
-
+	// Главнаая страница со список сверстанных макетов
+	var frontPage = {};
+	frontPage[settings.paths.prod.root + "/index.html"] = settings.paths.dev.root + "/index.jade";
+	// Styl файлы для компиляции
+	var stylusFiles = {};
+	if(grunt.file.isDir(settings.paths.dev.css)) {
+		grunt.file.recurse(settings.paths.dev.css, function(abspath, rootdir, subdir, filename) {
+			stylusFiles[(settings.paths.prod.css + "/" + filename.replace(".styl", ".css"))] = abspath;
+		});
+	}
+	// Конфигурация заданий
 	grunt.initConfig({
-
-		pkg: grunt.file.readJSON('package.json'),
-
+		// Компиляция стилевых файлов
 		stylus: {
 			main: {
 	      		options: {
 	          		compress: false,
-	          		import: ["nib"],
-	          		banner: "/**************************************************" + "\n" +
-	          				"\t" + "Project '" + settings.info.name + "', " + settings.info.year + "\n" +
-	          				"\t" +  "Last update: <%= grunt.template.today('dd.mm.yyyy') %>" + "\n" +
-	          				"\t" +  "Author: Alexandr Kirikovich, Russia, Rostov-on-Don | www.wemakesites.ru" + "\n" +
-	          				"\n" +
-	          				"\t" +  "Was used: Stylus, Nib, Grunt" + "\n" +
-	          				"**************************************************/\n\n"
+	          		import: ["nib"]
 	        	},
-	        	files: {
-	          		"./prod/css/dm.css": "./dev/public/css/dm.styl"
-	        	}
+	        	files: stylusFiles
 	      	}
 	    },
 
-	    //Jade files handling
+	    // Автоматическая генерация спрайтов
+    	sprite: {
+    		all: {
+        		src: settings.paths.dev.images + "/sprites/*.png",
+        		dest: settings.paths.dev.images + "/sprite.png",
+        		destCss: settings.paths.dev.css + "/sprite.styl",
+        		cssTemplate: settings.paths.dev.root + "/sprite.styl.mustache",
+        		padding: 20
+      		}
+    	},
+    	
+	    // Компиляция html шаблонов
 		jade: {
+			// Страницы
 			views: {
+				// Формирование параметров для компиляции
 	        	options: {
 	          		data: function(dest, src) {
-
 	          			var pagePath = src[0],
 	          				pagePathSplit = pagePath.split("/"),
 	          				pageName = pagePathSplit[pagePathSplit.length - 1].substr(0, pagePathSplit[pagePathSplit.length - 1].indexOf(".")),
 	          				pageParams = {};
-
 	          			if(pageName == "index") {
 	          				pageParams = settings;
 	          			} else {
@@ -56,240 +62,268 @@ module.exports = function(grunt) {
 	          				}
 	          				pageParams["info"] = settings.info;
 	          			}
-
 	          			return pageParams;
 	          		},
 	          		pretty: true
 	          	},
-	          	files: jadeFiles
-	       	}, 
+	          	files: jadeViews
+	       	},
+	       	// Главная страница со списком сверстанных страниц
 	       	front: {
 	       		options: {
-	       			data: settings,
-	       			pretty: true
+	       			pretty: true,
+	       			data: function(dest, src) {
+	       				var archives = [];
+	       				if(grunt.file.isDir(settings.paths.prod.archives)) {
+							grunt.file.recurse(settings.paths.prod.archives, function(abspath, rootdir, subdir, filename) {
+								archives.push({
+									"name": filename,
+									"path": abspath
+								});
+							});
+	       				}
+						var customSettings = settings;
+						customSettings.archives = archives;
+	       				return settings;
+	       			}
 	       		},
-	       		files: {
-	       			"./prod/index.html": "./dev/index.jade" 
-	       		}
+	       		files: frontPage
 	       	}
 	    },
 
-	    clean: {
-	    	js: {
-	    		src: "./prod/js/vendor/"
-	    	},
-	    	fonts: {
-	    		src: "./prod/fonts/"
-	    	},
-	    	images: {
-	    		src: "./prod/i/"
-	    	},
-	    	upload: {
-	    		src: "./prod/dummy/"
-	    	}
-	    },
-
-	    copy: {
-	    	// Copies robots.txt, web icons and .htaccess
-	    	service: {
-	    		files: [
-	    			{
-	    				src: "./dev/robots.txt",
-	    				dest: "./prod/robots.txt"
-	    			},
-	    			{
-	    				src: "./dev/.htaccess",
-	    				dest: "./prod/.htaccess"
-	    			},
-	    			{
-	    				src: "./dev/favicon.png",
-	    				dest: "./prod/favicon.png"
-	    			}
-	    		]
-	    	},
-	    	// Copies all javascript
-	    	js: {
-	    		files: [
-	    			{
-	    				expand: true,
-	    				cwd: "./dev/public/js/vendor/",
-	    				src: "*.js",
-	    				dest: "./prod/js/vendor/"
-	    			}
-	    		]
-	    	},
-	    	jsMain: {
-	    		files: [
-	    			{
-	    				src: "./dev/public/js/dm.js",
-	    				dest: "./prod/js/dm.js"
-	    			}
-	    		]
-	    	},
-	    	// Copies all fonts
-	    	fonts: {
-	    		files: [
-	    			{
-	    				expand: true,
-	    				cwd: "./dev/public/fonts/",
-	    				src: "**",
-	    				dest: "./prod/fonts/"
-	    			}
-	    		]
-	    	},
-	    	// Copies all images from ./dev/public/i directory
-	    	images: {
-	    		files: [
-	    			{
-	    				expand: true,
-	    				cwd: "./dev/public/i/",
-	    				src: "**",
-	    				dest: "./prod/i/"
-	    			}
-	    		]
-	    	},
-	    	// Copies all files from ./dev/upload directory
-	    	upload: {
-	    		files: [
-	    			{
-	    				expand: true,
-	    				cwd: "./dev/dummy/",
-	    				src: "**",
-	    				dest: "./prod/dummy/"
-	    			}
-	    		]
-	    	}
-	    },
-
+	    // Создание архива верстки
 	    compress: {
-	    	// Compress project for developer
 	    	production: {
 	    		options: {
-	    			archive: settings.paths.prod.archives + "/" + settings.info.code + "_<%= grunt.template.today('dd-mm-yyyy') %>.zip",
-	    			mode: "zip"
+	    			archive: settings.paths.prod.archives + "/" + settings.info.code + "_<%= grunt.template.today('dd-mm-yyyy_HH-MM-ss') %>.zip",
+	    			mode: "zip",
+	    			level: 9,
+	    			pretty: true
 	    		},
 	    		expand: true,
 	    		cwd: settings.paths.prod.root,
-	    		src: ["**", ".*"]
+	    		src: [
+	    			"**", 
+	    			".*",
+	    			"!archives",
+	    			"!archives/*"
+	    		]
 	    	}
 	    },
 
+	    // Выкладка на демонстрационный сервер
 	    ftp_push: {
-	    	upload: {
+	    	deploy: {
 	    		options: {
-	    			host: "62.109.22.8",
+	    			host: "www.wemakesites.ru",
 	    			port: 21,
-	    			authKey: "key",
-	    			dest: "/"
+	    			username: "projects",
+	    			password: "projects-root",
+	    			dest: "/" + settings.info.code
 	    		},
 	    		files: [
 	    			{
 	    				expand: true,
-	    				cwd: "./prod/",
+	    				cwd: "prod",
 	    				src: "**"
-	    			}
-	    		]
-	    	},
-	    	archives: {
-	    		options: {
-	    			host: "62.109.22.8",
-	    			port: 21,
-	    			authKey: "key",
-	    			dest: "/archives/"
-	    		},
-	    		files: [
-	    			{
+	    			}, {
 	    				expand: true,
-	    				cwd: "./archives/",
-	    				src: "*.zip"
+	    				src: "archives/**"
 	    			}
 	    		]
 	    	}
 	    },
 
-	    validation: {
-	    	html: {
-		    	options: {
-		    		stoponerror: false
-		    	},
-		    	files: [
-		    		{
-		    			src: "./prod/pages/*.html"
-		    		}
-		    	]
-	    	}
-	    },
-
-		markdown: {
-			docs: {
-				files: [{
-					expand: true,
-					src: '*.md',
-					dest: './prod/docs/',
-					ext: '.html',
-					cwd: "./dev/docs/"
-				}]
-			}
-		},
-
+	    // Контроль изменений
 	    watch: {
-	    	stylus: {
-	        	files: "./dev/public/css/*.styl",
+	    	// Перегенерация спрайта при добавлении картинок
+	    	sprite: {
+	    		options: {
+	    			cwd: (settings.paths.dev.images + "/sprites")
+	    		},
+	    		files: "*.png",
+	    		tasks: ["sprite:all"]
+	    	},
+	    	// Отслеживание изменения стилей
+	    	styles: {
+	      		options: {
+	      			cwd: settings.paths.dev.css
+	      		},
+	      		files: [
+	      			"*.styl",
+	      			"**/*.styl"
+	      		],
 	        	tasks: ["newer:stylus:main"]
 	      	},
-	      	jade: {
+	      	// Стилевые картинки
+	    	images: {
+	      		options: {
+	      			cwd: settings.paths.dev.images
+	      		},
 	      		files: [
-	      			"./dev/views/*.jade",
-	      			"./dev/lib/*.jade",
-	      			"./dev/templates/*.jade",
-	      			"./dev/index.jade",
-	      			"./dev/pages.json"
+	      			"*.png",
+	      			"**/*.png",
+	      			"*.jpg",
+	      			"**/*.jpg"
 	      		],
-	        	tasks: ["jade:views"]
+	        	tasks: ["sync:images"]
 	      	},
-	      	copy: {
-	      		files: ["./dev/public/js/dm.js"],
-	      		tasks: ["copy:jsMain"]
+	    	// Отслеживание изменения шрифтов
+	    	fonts: {
+	      		options: {
+	      			cwd: settings.paths.dev.fonts
+	      		},
+	      		files: [
+	      			"*.*",
+	      		],
+	        	tasks: ["sync:fonts"]
 	      	},
-	      	markdown: {
-	      		files: ["./dev/docs/*.md"],
-	      		tasks: ["newer:markdown:docs"]
+	     	// Отслеживание JS файлов
+	      	js: {
+	      		options: {
+	      			cwd: settings.paths.dev.js
+	      		},
+	      		files: [
+	      			"*.js",
+	      			"**/*.js"
+	      		],
+	      		tasks: ["sync:js"]
+	      	},
+	      	// Синхронизация презентационной графики
+	      	dummy: {
+	    		options: {
+	    			cwd: settings.paths.dev.dummy
+	    		},
+	      		files: [
+	      			"*.jpg",
+	      			"*.png",
+	      			"**/*.jpg",
+	      			"**/*.png"
+	      		],
+	      		tasks: ["sync:dummy"]
+	      	},
+	      	// Макеты (страницы). Обновлется только измененная страница
+	      	views: {
+	      		options: {
+	      			cwd: settings.paths.dev.views
+	      		},
+	      		files: [
+	      			"*.jade"
+	      		],
+	        	tasks: ["newer:jade:views"]
+	      	},
+	      	// Базовые шаблоны. Обновляются все страницы
+	      	template: {
+	      		options: {
+	      			cwd: settings.paths.dev.templates
+	      		},
+	      		files: [
+	      			"*.jade"
+	      		],
+	      		tasks: ["jade:views"]
 	      	}
-	    }
+	    },
+
+	    // Синхронизация
+	    sync: {
+	    	// Стилевые картинки
+	    	images: {
+	    		files: [
+	    			{
+	    				cwd: settings.paths.dev.images,
+	    				src: [
+	    					"**",
+	    					"*",
+	    					"!sprites",
+	    					"!sprites/*"
+	    				],
+	    				dest: settings.paths.prod.images
+	    			}
+	    		],
+	    		pretent: true,
+	    		updateAndDelete: true
+	    	},
+	    	// Скрипты
+	    	js: {
+	    		files: [
+	    			{
+	    				cwd: settings.paths.dev.js,
+	    				src: [
+	    					"**",
+	    					"*.js"
+	    				],
+	    				dest: settings.paths.prod.js
+	    			}
+	    		],
+	    		pretent: true,
+	    		updateAndDelete: true
+	    	},
+	    	// Шрифты
+	    	fonts: {
+	    		files: [
+	    			{
+	    				cwd: settings.paths.dev.fonts,
+	    				src: "*",
+	    				dest: settings.paths.prod.fonts
+	    			}
+	    		],
+	    		pretent: true,
+	    		updateAndDelete: true
+	    	},
+	    	// Презентационная графика
+	    	dummy: {
+	    		files: [
+	    			{
+	    				cwd: settings.paths.dev.dummy,
+	    				src: [
+	    					"**",
+	    					"*"
+	    				],
+	    				dest: settings.paths.prod.dummy
+	    			}
+	    		],
+	    		verbose: true,
+	    		pretent: true,
+	    		updateAndDelete: true
+	    	},
+	    	// Дополнительные файлы
+	    	service: {
+	    		files: [
+	    			{
+	    				cwd: settings.paths.dev.root,
+	    				src: ["robots.txt", ".htaccess", "favicon.png"],
+	    				dest: settings.paths.prod.root
+	    			}
+	    		],
+	    		verbose: true,
+	    		pretent: true,
+	    		updateAndDelete: true,
+	    		ignoreInDest: ["**/i/", "**/i/*", "**/css/", "**/css/*", "**/dummy/", "**/dummy/*", "**/js/", "**/js/*", "**/fonts/", "**/fonts/*", "**/index.html"]
+	    	},
+	    },
 	});
-
 	// Jade шаблонизатор
-	grunt.loadNpmTasks('grunt-contrib-jade');
+	grunt.loadNpmTasks("grunt-contrib-jade");
+	// Генератор спрайтов
+	grunt.loadNpmTasks("grunt-spritesmith");
+	// Стилевые файлы
+	grunt.loadNpmTasks("grunt-contrib-stylus");
+	// Синхронизация файлов
+	grunt.loadNpmTasks('grunt-sync');
+	// Контроль изменения файлов
+	grunt.loadNpmTasks("grunt-contrib-watch");
+	grunt.loadNpmTasks("grunt-newer");
+	// Создание архива проекта
+	grunt.loadNpmTasks("grunt-contrib-compress");
+	// FTP
+	grunt.loadNpmTasks("grunt-ftp-push");
 
-	// Load required modules
-	/*grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-contrib-stylus');
-	
-	
-	grunt.loadNpmTasks('grunt-contrib-compress');
-	
-	grunt.loadNpmTasks('grunt-contrib-copy');
-	grunt.loadNpmTasks('grunt-contrib-clean');
-
-	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-newer');
-
-
-
-
-
-	grunt.loadNpmTasks('grunt-ftp-push');
-	grunt.loadNpmTasks('grunt-html-validation');
-
-	grunt.loadNpmTasks('grunt-markdown');*/
-
-	// Task definitions
-
-	// Создание каскада проекта
+	/*** СОЗДАНИЕ КАРКАСА ПРОЕКТА ***/
 	// Пример вызова: grunt start:<name — название проекта на Русском языке>:<code — кодовое имя проекта на латинице>:<year — год разработки проекта>
-	grunt.registerTask("start", "Create project structure", function(name, code, year) {
-		// Если не передано ни одного аргумента
-		if(arguments.length === 0) {
+	grunt.registerTask("start", "Создание каркаса проекта", function(name, code, year) {
+		// Проверка наличия необходимых параметров
+		if(!name || !code || !year) {
+			grunt.log.error("Не заданы обязательные параметры");
 			return false;
 		}
 		// Создание раздела info
@@ -301,7 +335,7 @@ module.exports = function(grunt) {
 		if(name) {
 			settings.info.name = name;
 		}
-		// Задание кодового имени проекта
+		// Задание кодового имени проекта и ссылки на демонстрационном сервере
 		if(code) {
 			settings.info.code = code;
 			settings.info.productionUrl = "http://wemakesites.ru/" + code + "/";
@@ -310,14 +344,36 @@ module.exports = function(grunt) {
 		if(year) {
 			settings.info.year = year;
 		}
-
-		grunt.file.write('settings.json', JSON.stringify(settings, null, "	"));
+		// Запись значений в файл settings.json
+		grunt.file.write("settings.json", JSON.stringify(settings, null, "	"));
+		// Шаблоны имен css и js файлов
+		var cssFileName = settings.paths.dev.css + "/" + settings.info.code + ".styl",
+			jsFileName = settings.paths.dev.js + "/" + settings.info.code + ".js";
+		// Создание структуры каталогов проекта
+		// CSS
+		if(!grunt.file.exists(cssFileName)) {
+			grunt.file.mkdir(settings.paths.dev.css);
+			grunt.file.write(cssFileName);
+		}
+		// JS
+		if(!grunt.file.exists(jsFileName)) {
+			grunt.file.mkdir(settings.paths.dev.js);
+			grunt.file.write(jsFileName);
+		}
+		// Стилевые картинки
+		grunt.file.mkdir(settings.paths.dev.images);
+		// Шрифты
+		grunt.file.mkdir(settings.paths.dev.fonts);
+		// Презентационная графика
+		grunt.file.mkdir(settings.paths.dev.dummy);
+		// Удаление файла .gitignore из директории для разработки
+		grunt.file.delete(settings.paths.dev.root + "/.gitignore");
+		grunt.log.ok("Проект успешно создан");
 	});
 
-	// Добавление или обновление страницы
+	/*** ДОБАВЛЕНИЕ ИЛИ ОБНОВЛЕНИЕ СТРАНИЦЫ ***/
 	// Пример вызова: grunt page:<name — название страницы>:<code — кодовое имя страницы>:<progress — текущий прогресс>:<template — название шаблона>
-	grunt.registerTask("page", "Add or update page", function(name, code, progress, template) {
-
+	grunt.registerTask("page", "Добавление или обновление страницы", function(name, code, progress, template) {
 		// Если не передано ни одного аргумента
 		if(arguments.length === 0) {
 			return false;
@@ -328,7 +384,7 @@ module.exports = function(grunt) {
 		}
 		// Если страница уже существует
 		if(settings.pages[code] !== undefined) {
-			// Обновление название
+			// Обновление названия
 			if(name) {
 				settings.pages[code].name = name;
 			}
@@ -348,86 +404,47 @@ module.exports = function(grunt) {
 				"template": template
 			};
 		}
-
 		// Обновляем файл параметров
-		grunt.file.write('settings.json', JSON.stringify(settings, null, "	"));
-
+		grunt.file.write("settings.json", JSON.stringify(settings, null, "	"));
 		// Запускаем задание на обновление главной страницы
 		grunt.task.run("jade:front");
 	});
 
-
-	grunt.registerTask("production", ["copy", "jade:views", "stylus:main"]);
-
-	grunt.registerTask("move", ["clean", "copy"]);
-
-	grunt.registerTask("upload", ["ftp_push:upload"]);
-	grunt.registerTask("deploy", ["ftp_push:upload", "ftp_push:archives"]);
-
-	grunt.registerTask("make", ["production", "compress:production", "deploy"]);
-
-	grunt.registerTask("assemble", "Assemple project", function() {
-
-		var settings = grunt.file.readJSON("settings.json"),
-			devPaths = settings.paths.dev,
-			pages = settings.pages;
-
-		grunt.log.subhead("Creatings directories");
-		for(var k in devPaths) {
-
-			var curPath = devPaths[k];
-
-			if(grunt.file.isDir(curPath)) {
-				grunt.log.error(curPath + " already created");
-				continue;
-			}
-
-			grunt.file.mkdir(curPath);
-			grunt.log.ok(curPath + " was created");
-		}
-
-		grunt.log.subhead("Generating views");
-		for(var i = 0; i < pages.length; i++) {
-
-			var curPage = pages[i],
-				curFile = devPaths.views + "/" + pages[i].code + ".jade",
-				curDocFile = devPaths.docs + "/" + pages[i].code + ".md";
-				tmplPath = devPaths.templates + "/" + curPage.template + ".jade";
-				tmplStr = "";
-
-			if(curPage.template) {
-				tmplStr = "extends ../templates/" + curPage.template
-			}
-
-			if(grunt.file.isFile(curDocFile)) {
-				grunt.log.error(curDocFile + " already created");
-				continue;
-			} else {
-				grunt.file.write(curDocFile, '');
-				grunt.log.ok(curDocFile + " was created");
-			}
-
+	/*** ГЕНЕРАЦИЯ ВСЕХ НЕОБХОДИМЫХ ШАБЛОНОВ И МАКЕТОВ ***/
+	// Пример вызова: grunt generate
+	grunt.registerTask("generate", "Генерирование шаблонов", function() {
+		for(var pageCode in settings.pages) {
+			var page = settings.pages[pageCode],
+				curFile = settings.paths.dev.views + "/" + pageCode + ".jade",
+				tmplPath = settings.paths.dev.templates + "/" + page.template + ".jade";
+			// Проверка макета на существование
 			if(grunt.file.isFile(curFile)) {
-				grunt.log.error(curFile + " already created");
+				grunt.log.write(curFile + " уже существует");
 				continue;
 			}
-
-			if(curPage.template) {
+			// Создание шаблона
+			if(page.template) {
 				if(!grunt.file.isFile(tmplPath)) {
 					grunt.file.write(tmplPath);
-					grunt.log.ok("New template " + tmplPath + " was created");
+					grunt.log.ok("Шаблог " + page.template + " был создан");
 				} else {
-					grunt.log.error("Template " + tmplPath + " already created");
+					grunt.log.error("Шаблон " + page.template + " уже существует");
 				}
 			}
-
+			// Добавление указания шаблона к файлу макета
+			var tmplStr = '';
+			if(page.template) {
+				tmplStr = "extends ../templates/" + page.template
+			}
+			// Создание файла макета
 			grunt.file.write(curFile, tmplStr);
-			grunt.log.ok(curFile + " was created");
+			grunt.log.ok(curFile + " успешно создан");
 		}
-
-		 grunt.task.run("jade:views");
-		 grunt.task.run("markdown:docs");
-
 	});
 
+	/*** СОЗДАНИЕ ВЕРСИИ ДЛЯ ДЕМОНСТРАЦИИ ***/
+	grunt.registerTask("production", ["sync", "jade:views", "jade:front", "stylus:main"]);
+
+	/*** ВЫКЛАДКА НА ДЕМОНСТРАЦИОННЫЙ СЕРВЕР ***/
+	grunt.registerTask("deploy", ["ftp_push:deploy"]);
 };

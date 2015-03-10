@@ -1,10 +1,10 @@
 {
 	"info": {
-		"name": "Chebenha.ru",
-		"code": "chebenka",
-		"year": "2014",
+		"name": "",
+		"code": "",
+		"year": "",
 		"notes": "",
-		"productionUrl": "http://wemakesites.ru/chebenka/"
+		"productionUrl": ""
 	},
 	"paths": {
 		"dev": {
@@ -32,14 +32,9 @@
 	},
 	"pages": {
 		"home": {
-			"name": "Home page",
-			"progress": "15",
+			"name": "Главная страница",
+			"progress": "0",
 			"template": "base"
-		},
-		"inner": {
-			"name": "Inner page",
-			"progress": "27",
-			"template": "inner"
 		}
 	}
 }

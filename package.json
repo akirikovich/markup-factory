@@ -1,6 +1,6 @@
 {
 	"name": "Markup",
-	"description": "Stub for HTML project",
+	"description": "Stub for HTML projects",
 	"version": "1.0.0",
 	"homepage": "http://wemakesites.ru",
 	"author": {
@@ -11,6 +11,13 @@
 	"devDependencies": {
 		"grunt": "*",
 		"grunt-contrib-watch": "*",
-		"grunt-contrib-jade": "*"
+		"grunt-contrib-jade": "*",
+		"grunt-contrib-stylus": "*",
+		"grunt-spritesmith": "*",
+		"spritesheet-templates": "*",
+		"grunt-sync": "*",
+		"grunt-newer": "*",
+		"grunt-contrib-compress": "*",
+		"grunt-ftp-push": "*"
 	}
 }
