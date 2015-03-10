@@ -39,7 +39,7 @@ module.exports = function(grunt) {
         		padding: 20
       		}
     	},
-    	
+
 	    // Компиляция html шаблонов
 		jade: {
 			// Страницы
@@ -89,6 +89,76 @@ module.exports = function(grunt) {
 	       		},
 	       		files: frontPage
 	       	}
+	    },
+
+	    // Синхронизация статических файлов
+	    sync: {
+	    	// Стилевые картинки
+	    	images: {
+	    		files: [
+	    			{
+	    				cwd: settings.paths.dev.images,
+	    				src: "*",
+	    				dest: settings.paths.prod.images
+	    			}
+	    		],
+	    		verbose: true,
+	    		pretent: true,
+	    		updateAndDelete: true
+	    	},
+	    	// Скрипты
+	    	js: {
+	    		files: [
+	    			{
+	    				cwd: settings.paths.dev.js,
+	    				src: "*",
+	    				dest: settings.paths.prod.js
+	    			}
+	    		],
+	    		verbose: true,
+	    		pretent: true,
+	    		updateAndDelete: true
+	    	},
+	    	// Шрифты
+	    	fonts: {
+	    		files: [
+	    			{
+	    				cwd: settings.paths.dev.fonts,
+	    				src: "*",
+	    				dest: settings.paths.prod.fonts
+	    			}
+	    		],
+	    		verbose: true,
+	    		pretent: true,
+	    		updateAndDelete: true
+	    	},
+	    	// Презентационная графика
+	    	dummy: {
+	    		files: [
+	    			{
+	    				cwd: settings.paths.dev.dummy,
+	    				src: "*",
+	    				dest: settings.paths.prod.dummy
+	    			}
+	    		],
+	    		verbose: true,
+	    		pretent: true,
+	    		updateAndDelete: true
+	    	},
+	    	// Дополнительные файлы
+	    	service: {
+	    		files: [
+	    			{
+	    				cwd: settings.paths.dev.root,
+	    				src: ["robots.txt", ".htaccess", "favicon.png"],
+	    				dest: settings.paths.prod.root
+	    			}
+	    		],
+	    		verbose: true,
+	    		pretent: true,
+	    		updateAndDelete: true,
+	    		ignoreInDest: ["**/i/", "**/i/*", "**/css/", "**/css/*", "**/dummy/", "**/dummy/*", "**/js/", "**/js/*", "**/fonts/", "**/fonts/*", "**/index.html"]
+	    	},
 	    },
 
 	    // Создание архива верстки
@@ -295,12 +365,11 @@ module.exports = function(grunt) {
 	    				dest: settings.paths.prod.root
 	    			}
 	    		],
-	    		verbose: true,
 	    		pretent: true,
 	    		updateAndDelete: true,
 	    		ignoreInDest: ["**/i/", "**/i/*", "**/css/", "**/css/*", "**/dummy/", "**/dummy/*", "**/js/", "**/js/*", "**/fonts/", "**/fonts/*", "**/index.html"]
 	    	},
-	    },
+	    }
 	});
 	// Jade шаблонизатор
 	grunt.loadNpmTasks("grunt-contrib-jade");

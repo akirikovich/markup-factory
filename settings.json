@@ -27,7 +27,7 @@
 			"css": "./prod/css",
 			"js": "./prod/js",
 			"pages": "./prod/pages",
-			"archives": "./prod/archives"
+			"archives": "./archives"
 		}
 	},
 	"pages": {

@@ -4,7 +4,7 @@ html
 		meta(charset="UTF-8")
 		meta(name="viewport", content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no")
 		title Верстка проекта #{info.name}
-		link(href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css", rel="stylesheet", type="text/css")
+		link(href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css", rel="stylesheet", type="text/css")
 	body
 		div.container
 			header
@@ -14,6 +14,15 @@ html
 						h1 #{info.name}
 					if info.note
 						p.lead #{info.note}
+					if archives
+						div(class="dropdown")
+							a(id="archives", class="dropdown-toggle", role="button", data-toggle="dropdown", aria-haspopup="true", aria-expanded="archives") 
+								| Архивы
+								span(class="caret")
+							ul(class="dropdown-menu", role="menu", aria-labelledby="archives")
+								each archive in archives
+									li
+										a(href="#{archive.path}", class="link") #{archive.name}
 			//-Расчет прогресса
 			if pages
 				- var progress = 0, progressCount = 0;
@@ -44,10 +53,6 @@ html
 							td #{i}
 							td
 								a(href="pages/#{code}.html", target="_blank") #{page.name}
-								small(style="margin-left: 30px;")
-									a(href="docs/#{code}.html", target="_blank")
-										span(class="glyphicon glyphicon-comment")
-										|  docs
 								if page.note
 									br
 									small.text-muted #{page.note}
@@ -84,4 +89,4 @@ html
 						, #{info.year} г.
 			
 			script(src="https://code.jquery.com/jquery-1.11.0.min.js", type="text/javascript")
-			script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js", type="text/javascript")
+			script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js", type="text/javascript")
