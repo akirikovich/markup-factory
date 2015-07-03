@@ -74,32 +74,16 @@ app.use("/fonts", express.static(__dirname + '/prod/fonts'));
 
 
 // Router
-app.get("/menu", function(req, res) {
-	fs.readFile("./prod/pages/menu.html", "utf8", function(err, text) {
-		res.send(text);
-	});
-});
-app.get("/menu_item_large.html", function(req, res) {
-	fs.readFile("./prod/pages/menu_item_large.html", "utf8", function(err, text) {
-		res.send(text);
-	});
-});
-app.get("/menu_item_small.html", function(req, res) {
-	fs.readFile("./prod/pages/menu_item_small.html", "utf8", function(err, text) {
-		res.send(text);
-	});
-});
-app.get("/:page", function(req, res) {
+var settings = require("./settings.json"),
+	pages = settings.pages;
 
-	fs.readFile("./prod/pages/" + req.route.params.page + ".html", "utf8", function(err, text) {
-
-		parseParams(req.query, function() {
+for(var code in pages) {
+	app.get("/pages/" + code, function(req, res) {
+		fs.readFile("./prod/pages/" + code + ".html", "utf8", function(err, text) {
 			res.send(text);
 		});
-
 	});
-
-});
+}
 // //Router
 
 

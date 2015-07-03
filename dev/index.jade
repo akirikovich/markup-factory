@@ -3,26 +3,34 @@ html
 	head
 		meta(charset="UTF-8")
 		meta(name="viewport", content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no")
-		title Верстка проекта #{info.name}
+		title Верстка проекта #{info.name} | HTML Atlantis
 		link(href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css", rel="stylesheet", type="text/css")
 	body
-		div.container
+		div(class="container")
 			header
-				br
-				div.jumbotron
-					if info.name
-						h1 #{info.name}
-					if info.note
-						p.lead #{info.note}
-					if archives
-						div(class="dropdown")
-							a(id="archives", class="dropdown-toggle", role="button", data-toggle="dropdown", aria-haspopup="true", aria-expanded="archives") 
-								| Архивы
-								span(class="caret")
-							ul(class="dropdown-menu", role="menu", aria-labelledby="archives")
-								each archive in archives
-									li
-										a(href="#{archive.path}", class="link") #{archive.name}
+				//-Информация о проекте
+				div(class="jumbotron")
+
+					div(class="row")
+						div(class="col-sm-6 col-md-8")
+							if info.name
+								h1 #{info.name}
+							if info.notes
+								p #{info.notes}
+							if archives
+								div(class="dropdown")
+									button(type="button", class="btn btn-primary dropdown-toggle", data-toggle="dropdown", aria-haspopup="true", aria-expanded="false") 
+										| Архивы 
+										span(class="caret")
+									ul(class="dropdown-menu")
+										each archive in archives
+											li
+												a(href="#{archive.path}", class="link") #{archive.name}
+
+						div(class="col-sm-6 col-md-4")
+							div(class="thumbnail")
+								img(src="http://html-atlantis.ru/intro-bg.png", alt="")
+
 			//-Расчет прогресса
 			if pages
 				- var progress = 0, progressCount = 0;
@@ -31,12 +39,14 @@ html
 						- progress += Number(page.progress);
 						- progressCount++;
 				- progress = Math.floor(progress / progressCount);
-				h3 Суммарный прогресс
-				div.progress
-					div.progress-bar.progress-bar-success(role="progressbar", aria-valuenow="#{progress}", aria-valuemin="0", aria-valuemax="100", style="width: #{progress}%")
+				if progress == 0
+					- progress = 5
+				h3 Прогресс работ
+				div(class="progress")
+					div(class="progress-bar", role="progressbar", aria-valuenow="#{progress}", aria-valuemin="0", aria-valuemax="100", style="width: #{progress}%")
 						strong #{progress}%
 			br
-			h3 Список сверстанных страниц
+			h3 Страницы
 			table.table.table-hover
 				thead
 					tr
@@ -82,7 +92,7 @@ html
 				p.text-muted 
 					span(style="margin-left: -1em;") &copy; 
 					| Кирикович Александр, 
-					a(href="mailto:mail@akirikovich.ru") mail@akirikovich.ru
+					a(href="http://html-atlantis.ru", target="_blank") www.html-atlantis.ru
 					br
 					| г. Ростов-на-Дону
 					if info.year

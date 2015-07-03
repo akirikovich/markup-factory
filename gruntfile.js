@@ -40,6 +40,22 @@ module.exports = function(grunt) {
       		}
     	},
 
+    	// Оптимизация картинок
+    	imagemin: {
+    		optimize: {
+    			options: {
+    				optimizationLevel: 3,
+    				use: [mozjpeg()]
+    			},
+    			files: [{
+    				expand: true,
+    				cwd: settings.paths.dev.images,
+    				src: "['**/*.{png,jpg,gif}']",
+    				dest: settings.paths.prod.images
+    			}]
+    		}
+    	},
+
 	    // Компиляция html шаблонов
 		jade: {
 			// Страницы
@@ -54,9 +70,10 @@ module.exports = function(grunt) {
 	          			if(pageName == "index") {
 	          				pageParams = settings;
 	          			} else {
-	          				for(var i =0; i < settings.pages.length; i++) {
-	          					if(settings.pages[i].code == pageName) {
-	          						pageParams = settings.pages[i];
+	          				for (var code in settings.pages) {
+	          					if(code == pageName) {
+	          						pageParams = settings.pages[code];
+	          						pageParams.code = code;
 	          						break;
 	          					}
 	          				}
@@ -84,81 +101,12 @@ module.exports = function(grunt) {
 	       				}
 						var customSettings = settings;
 						customSettings.archives = archives;
+
 	       				return settings;
 	       			}
 	       		},
 	       		files: frontPage
 	       	}
-	    },
-
-	    // Синхронизация статических файлов
-	    sync: {
-	    	// Стилевые картинки
-	    	images: {
-	    		files: [
-	    			{
-	    				cwd: settings.paths.dev.images,
-	    				src: "*",
-	    				dest: settings.paths.prod.images
-	    			}
-	    		],
-	    		verbose: true,
-	    		pretent: true,
-	    		updateAndDelete: true
-	    	},
-	    	// Скрипты
-	    	js: {
-	    		files: [
-	    			{
-	    				cwd: settings.paths.dev.js,
-	    				src: "*",
-	    				dest: settings.paths.prod.js
-	    			}
-	    		],
-	    		verbose: true,
-	    		pretent: true,
-	    		updateAndDelete: true
-	    	},
-	    	// Шрифты
-	    	fonts: {
-	    		files: [
-	    			{
-	    				cwd: settings.paths.dev.fonts,
-	    				src: "*",
-	    				dest: settings.paths.prod.fonts
-	    			}
-	    		],
-	    		verbose: true,
-	    		pretent: true,
-	    		updateAndDelete: true
-	    	},
-	    	// Презентационная графика
-	    	dummy: {
-	    		files: [
-	    			{
-	    				cwd: settings.paths.dev.dummy,
-	    				src: "*",
-	    				dest: settings.paths.prod.dummy
-	    			}
-	    		],
-	    		verbose: true,
-	    		pretent: true,
-	    		updateAndDelete: true
-	    	},
-	    	// Дополнительные файлы
-	    	service: {
-	    		files: [
-	    			{
-	    				cwd: settings.paths.dev.root,
-	    				src: ["robots.txt", ".htaccess", "favicon.png"],
-	    				dest: settings.paths.prod.root
-	    			}
-	    		],
-	    		verbose: true,
-	    		pretent: true,
-	    		updateAndDelete: true,
-	    		ignoreInDest: ["**/i/", "**/i/*", "**/css/", "**/css/*", "**/dummy/", "**/dummy/*", "**/js/", "**/js/*", "**/fonts/", "**/fonts/*", "**/index.html"]
-	    	},
 	    },
 
 	    // Создание архива верстки
@@ -234,9 +182,24 @@ module.exports = function(grunt) {
 	      			"*.png",
 	      			"**/*.png",
 	      			"*.jpg",
-	      			"**/*.jpg"
+	      			"**/*.jpg",
+	      			"*.gif",
+	      			"**/*.gif"
 	      		],
 	        	tasks: ["sync:images"]
+	      	},
+	      	// SVG иконки
+	    	svg: {
+	      		options: {
+	      			cwd: settings.paths.dev.svg
+	      		},
+	      		files: [
+	      			"*.svg",
+	      			"**/*.svg",
+	      			"*.svg",
+	      			"**/*.svg"
+	      		],
+	        	tasks: ["sync:svg"]
 	      	},
 	    	// Отслеживание изменения шрифтов
 	    	fonts: {
@@ -291,11 +254,33 @@ module.exports = function(grunt) {
 	      			"*.jade"
 	      		],
 	      		tasks: ["jade:views"]
+	      	},
+	      	// Список страниц на верстку
+	      	frontpage: {
+	      		files: [
+	      			"settings.json",
+	      			"./dev/index.jade"
+	      		],
+	      		tasks: ["jade:front"]
 	      	}
 	    },
 
 	    // Синхронизация
 	    sync: {
+	    	svg: {
+	    		files: [
+	    			{
+	    				cwd: settings.paths.dev.svg,
+	    				src: [
+	    					"**",
+	    					"*"
+	    				],
+	    				dest: settings.paths.prod.svg
+	    			}
+	    		],
+	    		pretent: true,
+	    		updateAndDelete: true
+	    	},
 	    	// Стилевые картинки
 	    	images: {
 	    		files: [
@@ -367,7 +352,7 @@ module.exports = function(grunt) {
 	    		],
 	    		pretent: true,
 	    		updateAndDelete: true,
-	    		ignoreInDest: ["**/i/", "**/i/*", "**/css/", "**/css/*", "**/dummy/", "**/dummy/*", "**/js/", "**/js/*", "**/fonts/", "**/fonts/*", "**/index.html"]
+	    		ignoreInDest: ["**/i/", "**/i/*", "**/css/", "**/css/*", "**/dummy/", "**/dummy/*", "**/dummy/**/*", "**/js/", "**/js/*", "**/fonts/", "**/fonts/*", "**/index.html", "**/pages/", "**/pages/*", "**/svg/", "**/svg/*"]
 	    	},
 	    }
 	});
@@ -495,7 +480,7 @@ module.exports = function(grunt) {
 			if(page.template) {
 				if(!grunt.file.isFile(tmplPath)) {
 					grunt.file.write(tmplPath);
-					grunt.log.ok("Шаблог " + page.template + " был создан");
+					grunt.log.ok("Шаблон " + page.template + " был создан");
 				} else {
 					grunt.log.error("Шаблон " + page.template + " уже существует");
 				}
@@ -516,4 +501,7 @@ module.exports = function(grunt) {
 
 	/*** ВЫКЛАДКА НА ДЕМОНСТРАЦИОННЫЙ СЕРВЕР ***/
 	grunt.registerTask("deploy", ["ftp_push:deploy"]);
+
+	/*** Создание архива верстки ***/
+	grunt.registerTask("archive", ["compress:production", "jade:front"]);
 };

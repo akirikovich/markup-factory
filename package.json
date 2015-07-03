@@ -2,6 +2,7 @@
 	"name": "Markup",
 	"description": "Stub for HTML projects",
 	"version": "1.0.0",
+	"img": "",
 	"homepage": "http://wemakesites.ru",
 	"author": {
 		"name": "Alexandr Kirikovich",
@@ -18,6 +19,9 @@
 		"grunt-sync": "*",
 		"grunt-newer": "*",
 		"grunt-contrib-compress": "*",
-		"grunt-ftp-push": "*"
+		"grunt-ftp-push": "*",
+		"grunt-contrib-imagemin": "*",
+
+		"express": "*"
 	}
 }
