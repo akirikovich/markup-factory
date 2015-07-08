@@ -42,16 +42,16 @@ module.exports = function(grunt) {
 
     	// Оптимизация картинок
     	imagemin: {
-    		optimize: {
+    		static: {
     			options: {
-    				optimizationLevel: 3,
-    				use: [mozjpeg()]
+    				optimizationLevel: 3
     			},
     			files: [{
     				expand: true,
     				cwd: settings.paths.dev.images,
-    				src: "['**/*.{png,jpg,gif}']",
-    				dest: settings.paths.prod.images
+    				src: ["*.png"],
+    				dest: settings.paths.prod.images,
+    				ext: ".png"
     			}]
     		}
     	},
@@ -354,7 +354,20 @@ module.exports = function(grunt) {
 	    		updateAndDelete: true,
 	    		ignoreInDest: ["**/i/", "**/i/*", "**/css/", "**/css/*", "**/dummy/", "**/dummy/*", "**/dummy/**/*", "**/js/", "**/js/*", "**/fonts/", "**/fonts/*", "**/index.html", "**/pages/", "**/pages/*", "**/svg/", "**/svg/*"]
 	    	},
+	    },
+
+	    browserSync: {
+	    	bsFiles: {
+	    		src: "./prod/css/stub.css"
+	    	},
+	    	options: {
+	    		watchTask: true,
+	    		server: {
+	    			baseDir: "./prod/"
+	    		}
+	    	}
 	    }
+
 	});
 	// Jade шаблонизатор
 	grunt.loadNpmTasks("grunt-contrib-jade");
@@ -371,6 +384,10 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks("grunt-contrib-compress");
 	// FTP
 	grunt.loadNpmTasks("grunt-ftp-push");
+	// Imagemin
+	grunt.loadNpmTasks("grunt-contrib-imagemin");
+	// Синхронизация с браузером
+	grunt.loadNpmTasks("grunt-browser-sync");
 
 	/*** СОЗДАНИЕ КАРКАСА ПРОЕКТА ***/
 	// Пример вызова: grunt start:<name — название проекта на Русском языке>:<code — кодовое имя проекта на латинице>:<year — год разработки проекта>
@@ -501,6 +518,8 @@ module.exports = function(grunt) {
 
 	/*** ВЫКЛАДКА НА ДЕМОНСТРАЦИОННЫЙ СЕРВЕР ***/
 	grunt.registerTask("deploy", ["ftp_push:deploy"]);
+
+	grunt.registerTask("see", ["browserSync", "watch"]);
 
 	/*** Создание архива верстки ***/
 	grunt.registerTask("archive", ["compress:production", "jade:front"]);
